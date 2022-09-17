@@ -11,14 +11,18 @@ struct ContentView: View {
     @State private var newWord = ""
     @State private var usedWords = [String]()
     @State private var rootWord = ""
+    @State private var allWords = [String]()
+    @State private var score = 0
     
     @State private var errorTitle = ""
     @State private var errorMessage = ""
     @State private var showingError = false
     
     
+    
     var body: some View {
         NavigationView {
+            
             List {
                 Section {
                     TextField("Enter your word", text: $newWord)
@@ -33,17 +37,29 @@ struct ContentView: View {
                         }
                     }
                 }
-                
             }
             .navigationTitle(rootWord)
             .onSubmit(addNewWord)
-            .onAppear(perform: startGame)
+            .onAppear(perform: loadWords)
             .alert(errorTitle, isPresented: $showingError) {
                 Button("OK", role:.cancel) {}
             } message: {
                 Text(errorMessage)
             }
+            .toolbar {
+                ToolbarItem(placement: .bottomBar) {
+                    HStack {
+                        Text("Score: \(score)")
+                        Spacer()
+                        
+                        Button("New Word") {
+                            startGame()
+                        }
+                    }
+                }
+            }
         }
+
     }
     
     
@@ -74,18 +90,26 @@ struct ContentView: View {
             usedWords.insert(answer, at: 0)
         }
         newWord = ""
+        score += answer.count
     }
     
     
-    func startGame() {
+    func loadWords() {
         if let startWordsURL = Bundle.main.url(forResource: "start", withExtension: "txt") {
             if let startWords = try? String(contentsOf: startWordsURL) {
-                let allWords = startWords.components(separatedBy: "\n")
-                rootWord = allWords.randomElement() ?? "silkworm"
+                allWords = startWords.components(separatedBy: "\n")
+                startGame()
                 return
             }
         }
         fatalError("Could not load start.txt from bundle")
+    }
+    
+    
+    func startGame() {
+        usedWords = [String]()
+        rootWord = allWords.randomElement() ?? "silkworm"
+        score = 0
     }
     
     
