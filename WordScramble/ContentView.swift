@@ -62,6 +62,14 @@ struct ContentView: View {
             wordError(title: "Word not recognised", message: "You can't just make them up!")
             return
         }
+        guard isLongEnough(word: answer) else {
+            wordError(title: "Word too short", message: "Your words need to be three letters or longer")
+            return
+        }
+        guard isNovel(word: answer) else {
+            wordError(title: "Plagiarised", message: "Make up your own words!")
+            return
+        }
         withAnimation {
             usedWords.insert(answer, at: 0)
         }
@@ -104,6 +112,15 @@ struct ContentView: View {
         let range = NSRange(location: 0, length: word.utf16.count)
         let misspelledRange = checker.rangeOfMisspelledWord(in: word, range: range, startingAt: 0, wrap: false, language: "en")
         return misspelledRange.location == NSNotFound
+    }
+    
+    
+    func isLongEnough(word: String) -> Bool {
+        return word.count > 2
+    }
+    
+    func isNovel(word: String) -> Bool {
+        return word != rootWord
     }
     
     
